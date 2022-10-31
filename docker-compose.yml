@@ -1,0 +1,9 @@
+version: "2.2"
+services:
+  log-server:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - "${FILE_PATH:-/var/www/html}:/local_path"
+      - "${CONFIG_PATH:-/etc/local-url-cache}:/etc/local-url-cache"

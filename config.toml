@@ -1,0 +1,3 @@
+# Configuration
+LOCAL_PATH = "/local_path"
+REMOTE_HOST = "https://ci.hobot.cc"

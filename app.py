@@ -32,7 +32,9 @@ else:
 @app.route('/<path:path>')
 def send_report(path):
     if os.path.exists(os.path.join(app.config['LOCAL_PATH'], path)):
-        return send_from_directory(app.config["LOCAL_PATH"], path)
+        response =  send_from_directory(app.config["LOCAL_PATH"], path)
+        response.headers["Content-Type"] = 'text/plain; charset=utf-8'
+        return response
     else:
         return redirect('{:s}/{:s}'.format(app.config["REMOTE_HOST"], path))
 

@@ -18,25 +18,32 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+#   https://gist.github.com/debuggerboy/d815cf8c45814d78f376
+#
 import os
 import toml
 from flask import Flask, render_template, request
 from flask import send_from_directory, redirect
 
-app = Flask(__name__)
+class WebCacheApp(Flask):
+
+    def send_static_file(self, filename: str):
+        real_path = os.path.join(str(self.static_folder), filename)
+        if os.path.exists(real_path):
+            return Flask.send_static_file(self, filename)
+        else:
+            return redirect('{:s}/{:s}'.format(app.config["REMOTE_HOST"], filename))
+
+
+app = WebCacheApp(__name__, static_url_path='/')
+
 if os.path.exists("/etc/local-url-cache/config.toml"):
     app.config.from_file("/etc/local-url-cache/config.toml", load=toml.load)
 else:
     app.config.from_file("config.toml", load=toml.load)
 
-@app.route('/<path:path>')
-def send_report(path):
-    if os.path.exists(os.path.join(app.config['LOCAL_PATH'], path)):
-        response =  send_from_directory(app.config["LOCAL_PATH"], path)
-        response.headers["Content-Type"] = 'text/plain; charset=utf-8'
-        return response
-    else:
-        return redirect('{:s}/{:s}'.format(app.config["REMOTE_HOST"], path))
+app.static_folder = app.config['LOCAL_PATH']
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=False)
